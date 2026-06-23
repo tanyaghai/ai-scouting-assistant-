@@ -6,3 +6,8 @@ venv/
 .streamlit/
 data/chroma_db/
 data/*.csv
+
+data/raw/*
+data/processed/*
+data/teams/*
+
