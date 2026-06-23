@@ -1,10 +1,24 @@
 import json
 from pathlib import Path
 from datetime import datetime, timezone
+import math
+
 
 TEAM_CACHE_DIR = Path("data/teams")
 TEAM_CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
+
+def clean_for_json(value):
+    if isinstance(value, dict):
+        return {k: clean_for_json(v) for k, v in value.items()}
+
+    if isinstance(value, list):
+        return [clean_for_json(v) for v in value]
+
+    if isinstance(value, float) and math.isnan(value):
+        return None
+
+    return value
 
 def normalize_team_name(team_name: str) -> str:
     return (
@@ -30,6 +44,8 @@ def save_team_data(team_name: str, data: dict) -> None:
 
     data["team_name"] = team_name
     data["last_updated"] = datetime.now(timezone.utc).isoformat()
+
+    data = clean_for_json(data)
 
     with open(path, "w") as f:
         json.dump(data, f, indent=2)
