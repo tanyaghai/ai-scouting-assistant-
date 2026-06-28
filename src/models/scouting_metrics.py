@@ -310,8 +310,8 @@ def game_four_factors(team_a_players: list, team_b_players: list) -> dict:
 # 4. roll-up for one team, ready to hand to the chatbot
 # ---------------------------------------------------------------------------
 
-def build_scouting_metrics(team_name: str) -> dict:
-    team_data = load_team_data(team_name)
+def build_scouting_metrics(team_name: str, season: str = None) -> dict:
+    team_data = load_team_data(team_name, season=season)
     players = team_data.get("player_stats", []) or []
     team_totals = aggregate_team_totals_from_roster(players)
 

@@ -40,10 +40,7 @@ def normalize_name(name: str) -> str:
     )
 
 
-def get_roster_names(team_name: str) -> set[str]:
-    team_data = load_team_data(team_name)
-    players = team_data.get("player_stats", [])
-
+def get_roster_names_from_players(players: list) -> set:
     return {
         normalize_name(player["name"])
         for player in players
@@ -51,8 +48,11 @@ def get_roster_names(team_name: str) -> set[str]:
     }
 
 
-def get_recent_player_impact(team_name: str, stats_url: str):
-    roster_names = get_roster_names(team_name)
+def get_recent_player_impact(team_name: str, stats_url: str, roster_players: list = None):
+    if roster_players is not None:
+        roster_names = get_roster_names_from_players(roster_players)
+    else:
+        roster_names = get_roster_names(team_name)
     links = get_last_five_box_score_links(stats_url)
 
     all_rows = []

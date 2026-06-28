@@ -4,7 +4,7 @@ from io import StringIO
 import pandas as pd
 import requests
 
-from src.storage.cache_manager import load_team_data, save_team_data
+from src.storage.cache_manager import load_team_data, save_current_team_data
 
 
 HEADERS = {
@@ -23,6 +23,15 @@ SCIAC_TEAM_STATS_URLS = {
     "Whittier": "https://wcpoets.com/sports/womens-basketball/stats",
     "Occidental": "https://oxyathletics.com/sports/womens-basketball/stats",
 }
+
+
+BAD_PLAYER_KEYWORDS = [
+    "total",
+    "totals",
+    "opponent",
+    "opponents",
+    "tm team",
+]
 
 
 def clean_value(value):
@@ -51,6 +60,15 @@ def clean_player_name(name: str) -> str:
     return name.strip()
 
 
+def is_real_player_name(name: str) -> bool:
+    normalized = str(name).strip().lower()
+
+    if not normalized:
+        return False
+
+    return not any(keyword in normalized for keyword in BAD_PLAYER_KEYWORDS)
+
+
 def get_full_roster_stats(url: str) -> list[dict]:
     tables = get_tables(url)
     roster = tables[1].copy()
@@ -63,8 +81,13 @@ def get_full_roster_stats(url: str) -> list[dict]:
         if pd.isna(raw_name):
             continue
 
+        cleaned_name = clean_player_name(raw_name)
+
+        if not is_real_player_name(cleaned_name):
+            continue
+
         player = {
-            "name": clean_player_name(raw_name),
+            "name": cleaned_name,
             "games": clean_value(row.iloc[2]),
             "games_started": clean_value(row.iloc[3]),
             "minutes": clean_value(row.iloc[4]),
@@ -96,6 +119,37 @@ def get_full_roster_stats(url: str) -> list[dict]:
     return players
 
 
+def get_team_stats_from_sidearm(stats_url: str) -> dict:
+    tables = get_tables(stats_url)
+
+    game_log = tables[5].copy()
+
+    game_log = game_log[game_log["W/L"].notna()]
+    game_log = game_log[game_log["Score"] != "-"]
+
+    wins = int((game_log["W/L"] == "W").sum())
+    losses = int((game_log["W/L"] == "L").sum())
+    games = int(len(game_log))
+
+    def avg(col):
+        return round(float(game_log[col].mean()), 3)
+
+    return {
+        "games": games,
+        "wins": wins,
+        "losses": losses,
+        "ppg": avg("PTS"),
+        "fg_pct": avg("PCT"),
+        "three_pct": avg("PCT.1"),
+        "ft_pct": avg("PCT.2"),
+        "rebounds_per_game": avg("TOT"),
+        "assists_per_game": avg("AST"),
+        "turnovers_per_game": avg("TO"),
+        "blocks_per_game": avg("BLK"),
+        "steals_per_game": avg("STL"),
+    }
+
+
 def save_roster_to_cache(team_name: str, url: str):
     players = get_full_roster_stats(url)
 
@@ -104,14 +158,14 @@ def save_roster_to_cache(team_name: str, url: str):
     except FileNotFoundError:
         team_data = {
             "source": "Sidearm",
-            "season": "2025",
-            "team_stats": {}
+            "season": "current",
+            "team_stats": {},
         }
 
     team_data["player_stats"] = players
     team_data["player_stats_source_url"] = url
 
-    save_team_data(team_name, team_data)
+    save_current_team_data(team_name, team_data)
 
     print(f"Saved {len(players)} players for {team_name}")
 
