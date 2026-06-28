@@ -22,7 +22,7 @@ than the season-level ones built from sidearm_collector roster totals).
 """
 
 from src.storage.cache_manager import load_team_data
-from src.data_collection.sciac_collector import SCIAC_TEAM_STATS_URLS
+from src.data_collection.sidearm_collector import SCIAC_TEAM_STATS_URLS
 
 
 # ---------------------------------------------------------------------------
