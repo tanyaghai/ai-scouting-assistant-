@@ -10,4 +10,5 @@ data/*.csv
 data/raw/*
 data/processed/*
 data/teams/*
+data/model_outputs/*
 
