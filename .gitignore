@@ -11,4 +11,5 @@ data/raw/*
 data/processed/*
 data/teams/*
 data/model_outputs/*
+data/oldscouts/*
 
