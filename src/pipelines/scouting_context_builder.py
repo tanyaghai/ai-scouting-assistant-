@@ -61,9 +61,15 @@ def build_player_context(team_name: str) -> list[dict]:
     team_data = get_team_data(team_name)
     canonical_team_name = team_data.get("team_name", team_name)
 
+    raw_players = team_data.get("player_stats", [])
     player_roles = classify_team_player_roles(team_name)
     recent_forms = classify_team_recent_player_form(team_name)
     ml_df = load_ml_archetypes()
+
+    raw_by_name = {
+        normalize_name(player["name"]): player
+        for player in raw_players
+    }
 
     recent_by_name = {
         normalize_name(player["name"]): player
@@ -74,11 +80,13 @@ def build_player_context(team_name: str) -> list[dict]:
 
     for player in player_roles:
         name = player["name"]
+        normalized = normalize_name(name)
 
         players.append({
             "name": name,
+            "raw_stats": raw_by_name.get(normalized, {}),
             "rule_based_profile": player,
-            "recent_form": recent_by_name.get(normalize_name(name), {}),
+            "recent_form": recent_by_name.get(normalized, {}),
             "ml_profile": get_player_ml_archetype(canonical_team_name, name, ml_df),
         })
 
