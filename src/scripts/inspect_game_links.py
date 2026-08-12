@@ -2,9 +2,11 @@ import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 
+REQUEST_TIMEOUT = 15  # seconds; prevents a hung site from freezing the app
+
 URL = "https://cmsathletics.org/sports/womens-basketball/stats"
 
-response = requests.get(URL, headers={"User-Agent": "Mozilla/5.0"})
+response = requests.get(URL, headers={"User-Agent": "Mozilla/5.0"}, timeout=REQUEST_TIMEOUT)
 response.raise_for_status()
 
 soup = BeautifulSoup(response.text, "html.parser")

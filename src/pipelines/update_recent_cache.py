@@ -1,5 +1,5 @@
 from src.models.recent_player_impact import get_recent_player_impact
-from src.storage.cache_manager import load_team_data, save_team_data
+from src.storage.cache_manager import load_team_data, save_current_team_data
 from src.data_collection.recent_games_collector import summarize_last_five_team_trends
 
 TEAM_URLS = {
@@ -14,19 +14,24 @@ TEAM_URLS = {
     "Claremont-Mudd-Scripps": "https://cmsathletics.org/sports/womens-basketball/stats"
 }
 
-for team_name, url in TEAM_URLS.items():
-    print(f"Updating {team_name}")
+def update_recent_cache_for_all_teams():
+    for team_name, url in TEAM_URLS.items():
+        print(f"Updating {team_name}")
 
-    team_data = load_team_data(team_name)
+        team_data = load_team_data(team_name)
 
-    recent_df = get_recent_player_impact(team_name, url)
+        recent_df = get_recent_player_impact(team_name, url)
 
-    team_data["recent_player_impact"] = (
-        recent_df.round(2).to_dict(orient="records")
-    )
-    
-    team_data["recent_team_trends"] = summarize_last_five_team_trends(url)
+        team_data["recent_player_impact"] = (
+            recent_df.round(2).to_dict(orient="records")
+        )
 
-    save_team_data(team_name, team_data)
+        team_data["recent_team_trends"] = summarize_last_five_team_trends(url)
 
-print("Done.")
+        save_current_team_data(team_name, team_data)
+
+    print("Done.")
+
+
+if __name__ == "__main__":
+    update_recent_cache_for_all_teams()

@@ -1,7 +1,9 @@
 import pandas as pd
 import requests
 from io import StringIO
-from src.storage.cache_manager import save_team_data
+from src.storage.cache_manager import save_current_team_data
+
+REQUEST_TIMEOUT = 15  # seconds; prevents a hung site from freezing the app
 
 SCIAC_URL = "https://thesciac.org/stats.aspx?path=wbball&year=2025"
 
@@ -24,7 +26,7 @@ TEAM_TABLES = {
 }
 
 def get_sciac_tables():
-    response = requests.get(SCIAC_URL, headers=HEADERS)
+    response = requests.get(SCIAC_URL, headers=HEADERS, timeout=REQUEST_TIMEOUT)
     response.raise_for_status()
 
     return pd.read_html(StringIO(response.text))
@@ -87,7 +89,7 @@ def save_sciac_teams_to_cache():
             "player_stats": []
         }
 
-        save_team_data(team_name, data)
+        save_current_team_data(team_name, data)
 
     print(f"Saved {len(df)} SCIAC teams to cache.")
 

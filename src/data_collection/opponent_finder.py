@@ -9,6 +9,8 @@ from src.data_collection.sidearm_collector import get_full_roster_stats
 from src.data_collection.season_detector import detect_season_from_stats_page
 from src.storage.season_lifecycle import season_start_year
 
+REQUEST_TIMEOUT = 15  # seconds; prevents a hung site from freezing the app
+
 
 load_dotenv()
 
@@ -39,6 +41,7 @@ def search_web(query: str) -> list:
             "Content-Type": "application/json",
         },
         json={"q": query},
+        timeout=REQUEST_TIMEOUT,
     )
     response.raise_for_status()
 
@@ -46,7 +49,7 @@ def search_web(query: str) -> list:
 
 
 def page_mentions_team(url: str, team_name: str) -> bool:
-    response = requests.get(url, headers={"User-Agent": "Mozilla/5.0"})
+    response = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=REQUEST_TIMEOUT)
     response.raise_for_status()
 
     soup = BeautifulSoup(response.text, "html.parser")

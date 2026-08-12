@@ -2,9 +2,11 @@ import pandas as pd
 import requests
 from io import StringIO
 
+REQUEST_TIMEOUT = 15  # seconds; prevents a hung site from freezing the app
+
 URL = "https://cmsathletics.org/boxscore.aspx?id=9826&path=wbball"
 
-response = requests.get(URL, headers={"User-Agent": "Mozilla/5.0"})
+response = requests.get(URL, headers={"User-Agent": "Mozilla/5.0"}, timeout=REQUEST_TIMEOUT)
 response.raise_for_status()
 
 tables = pd.read_html(StringIO(response.text))
