@@ -7,6 +7,7 @@ sys.path.append(str(PROJECT_ROOT))
 import streamlit as st
 
 from src.chat.scouting_chat import ask_scouting_assistant
+from src.config import OUR_TEAM
 from src.export.scout_template_docx import export_chapman_style_docx
 from src.export.scout_pdf_converter import export_chapman_style_pdf
 
@@ -123,7 +124,14 @@ with st.sidebar:
 
     team_name = st.text_input(
         "Opponent",
-        value="Claremont_Mudd_Scripps",
+        value="Chapman",
+    )
+
+    our_team = st.text_input(
+        "Our team",
+        value=OUR_TEAM,
+        help="Scouts are written from this team's perspective, including "
+             "head-to-head numbers and defensive assignments.",
     )
 
     coach_notes = st.text_area(
@@ -140,7 +148,9 @@ with st.sidebar:
 
     st.markdown("---")
     st.caption(
-        "Uses current stats, recent form, player profiles, ML archetypes, coach notes, and historical scout style."
+        f"Compares {our_team} against the opponent using current stats, recent "
+        "form, player profiles, ML archetypes, coach notes, and historical "
+        "scout style. Defensive assignments are computed from both rosters."
     )
 
 if "messages" not in st.session_state:
@@ -169,6 +179,7 @@ if user_request:
         status.write("🏀 Loading opponent statistics")
         status.write("🧠 Building scouting context")
         status.write("📈 Analyzing recent form")
+        status.write(f"🥊 Matching up {our_team} personnel")
         status.write("📚 Applying historical scout style")
         status.write("🤖 Writing response with Qwen")
 
@@ -176,6 +187,7 @@ if user_request:
             team_name=team_name,
             coach_notes=coach_notes,
             user_request=user_request,
+            our_team=our_team,
         )
 
         status.update(label="Scout ready", state="complete", expanded=False)
