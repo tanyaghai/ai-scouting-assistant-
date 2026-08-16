@@ -1,14 +1,10 @@
 import pandas as pd
 
-from src.storage.cache_manager import TEAM_CACHE_DIR, load_team_data
+from src.storage.cache_manager import list_cached_team_names, load_team_data
 
 
 def get_cached_team_names():
-    team_dirs = [
-        path for path in TEAM_CACHE_DIR.iterdir()
-        if path.is_dir() and (path / "current.json").exists()
-    ]
-    return [path.name for path in team_dirs]
+    return list_cached_team_names()
 
 
 def build_team_feature_table() -> pd.DataFrame:
