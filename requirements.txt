@@ -11,7 +11,10 @@ cachetools==6.2.6
 certifi==2026.6.17
 charset-normalizer==3.4.7
 chromadb==1.5.9
-click==8.2.1
+# click 8.2+ requires Python 3.10, but this project also runs on 3.9,
+# where typer accepts the older pin. Markers keep both working.
+click==8.1.8 ; python_version < "3.10"
+click==8.2.1 ; python_version >= "3.10"
 coloredlogs==15.0.1
 durationpy==0.10
 exceptiongroup==1.3.1
