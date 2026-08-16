@@ -2,11 +2,13 @@ import re
 import requests
 from bs4 import BeautifulSoup
 
+REQUEST_TIMEOUT = 15  # seconds; prevents a hung site from freezing the app
+
 HEADERS = {"User-Agent": "Mozilla/5.0"}
 
 
 def detect_season_from_stats_page(stats_url: str):
-    response = requests.get(stats_url, headers=HEADERS)
+    response = requests.get(stats_url, headers=HEADERS, timeout=REQUEST_TIMEOUT)
     response.raise_for_status()
 
     soup = BeautifulSoup(response.text, "html.parser")

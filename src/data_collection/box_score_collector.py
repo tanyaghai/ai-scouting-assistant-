@@ -6,11 +6,13 @@ import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 
+REQUEST_TIMEOUT = 15  # seconds; prevents a hung site from freezing the app
+
 HEADERS = {"User-Agent": "Mozilla/5.0"}
 
 
 def get_tables(url: str):
-    response = requests.get(url, headers=HEADERS)
+    response = requests.get(url, headers=HEADERS, timeout=REQUEST_TIMEOUT)
     response.raise_for_status()
     return pd.read_html(StringIO(response.text))
 

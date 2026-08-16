@@ -6,6 +6,8 @@ import requests
 
 from src.storage.cache_manager import load_team_data, save_current_team_data
 
+REQUEST_TIMEOUT = 15  # seconds; prevents a hung site from freezing the app
+
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0"
@@ -41,7 +43,7 @@ def clean_value(value):
 
 
 def get_tables(url: str):
-    response = requests.get(url, headers=HEADERS)
+    response = requests.get(url, headers=HEADERS, timeout=REQUEST_TIMEOUT)
     response.raise_for_status()
     return pd.read_html(StringIO(response.text))
 

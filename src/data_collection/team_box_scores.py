@@ -2,11 +2,13 @@ import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 
+REQUEST_TIMEOUT = 15  # seconds; prevents a hung site from freezing the app
+
 HEADERS = {"User-Agent": "Mozilla/5.0"}
 
 
 def get_box_score_links(stats_url: str):
-    response = requests.get(stats_url, headers=HEADERS)
+    response = requests.get(stats_url, headers=HEADERS, timeout=REQUEST_TIMEOUT)
     response.raise_for_status()
 
     soup = BeautifulSoup(response.text, "html.parser")

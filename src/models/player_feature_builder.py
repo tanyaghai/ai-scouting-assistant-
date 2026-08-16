@@ -1,6 +1,6 @@
 import pandas as pd
 
-from src.storage.cache_manager import TEAM_CACHE_DIR, load_team_data
+from src.storage.cache_manager import list_cached_team_names, load_team_data
 
 
 def safe_div(num, den):
@@ -10,11 +10,7 @@ def safe_div(num, den):
 
 
 def get_cached_team_names():
-    team_dirs = [
-        path for path in TEAM_CACHE_DIR.iterdir()
-        if path.is_dir() and (path / "current.json").exists()
-    ]
-    return [path.name for path in team_dirs]
+    return list_cached_team_names()
 
 
 def build_player_feature_table() -> pd.DataFrame:
@@ -57,6 +53,9 @@ def build_player_feature_table() -> pd.DataFrame:
     df = pd.DataFrame(rows)
 
     if df.empty:
+        # Still hand back the eligibility column, so callers filtering on it
+        # get an empty result instead of a confusing KeyError.
+        df["eligible_for_ml"] = pd.Series(dtype=bool)
         return df
 
     # Keep one row per player/team/season.

@@ -52,10 +52,44 @@ def cleanup_old_archives(team_name: str, keep_season: str) -> None:
         path.unlink()
 
 
+def get_latest_team_cache_path(team_name: str):
+    """
+    Best available cache file for a team.
+
+    Prefers current.json. Falls back to the most recent archived season,
+    because between the August season rollover and the first games of the
+    new season, stats pages still publish last season -- so ingestion files
+    everything as archived and nothing is ever "current".
+    """
+    current = get_current_team_cache_path(team_name)
+    if current.exists():
+        return current
+
+    archives = sorted(
+        (
+            path
+            for path in get_team_cache_dir(team_name).glob("*.json")
+            if path.name != "current.json"
+        ),
+        key=lambda path: path.stem,
+    )
+
+    return archives[-1] if archives else None
+
+
+def list_cached_team_names() -> list:
+    """Every team with usable cached data, current or archived."""
+    return [
+        path.name
+        for path in TEAM_CACHE_DIR.iterdir()
+        if path.is_dir() and get_latest_team_cache_path(path.name) is not None
+    ]
+
+
 def team_exists(team_name: str, season: str = None) -> bool:
     if season:
         return get_archived_team_cache_path(team_name, season).exists()
-    return get_current_team_cache_path(team_name).exists()
+    return get_latest_team_cache_path(team_name) is not None
 
 
 def save_current_team_data(team_name: str, data: dict) -> None:
@@ -83,10 +117,10 @@ def load_team_data(team_name: str, season: str = None) -> dict:
     path = (
         get_archived_team_cache_path(team_name, season)
         if season
-        else get_current_team_cache_path(team_name)
+        else get_latest_team_cache_path(team_name)
     )
 
-    if not path.exists():
+    if path is None or not path.exists():
         raise FileNotFoundError(f"No cached data found for {team_name}")
 
     with open(path, "r") as f:

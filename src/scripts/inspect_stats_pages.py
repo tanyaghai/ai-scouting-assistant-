@@ -2,6 +2,8 @@ import pandas as pd
 import requests
 from io import StringIO
 
+REQUEST_TIMEOUT = 15  # seconds; prevents a hung site from freezing the app
+
 SCIAC_URL = "https://thesciac.org/stats.aspx?path=wbball&year=2025"
 CMS_URL = "https://cmsathletics.org/sports/womens-basketball/stats"
 
@@ -11,7 +13,7 @@ HEADERS = {
 
 
 def read_tables_from_url(url: str):
-    response = requests.get(url, headers=HEADERS)
+    response = requests.get(url, headers=HEADERS, timeout=REQUEST_TIMEOUT)
     response.raise_for_status()
     return pd.read_html(StringIO(response.text))
 
